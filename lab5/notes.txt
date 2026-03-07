@@ -1,0 +1,177 @@
+Lab 5 COMP 2604
+===============
+
+# Hardware Clocks
+  - **RTC (Real-Time Clock)**:
+      - This is a clock that runs independently of the CPU
+        even when the system is turned off, powered by a
+        small battery.
+      - RTC is only read by the kernel once upon system boot
+        to synchronise the current date and time, and then is
+        no longer used.
+  - **TSC (Time Stamp Counter)**:
+      - Exists as a 64-bit register which increments every
+        clock cycle. This can be read from using the
+        rdtsc x86 assembly instruction (read time stamp counter)
+      - Used for performance and benchmarking (You can divide
+        the rdtsc value by CLOCKS_PER_SEC to generate performance
+        metrics which is very useful (eg. determine how long
+        a function took to execute, generate framerate/frametime
+        values for games, etc.)
+  - **PIT (Programmable Interval Timer)**:
+      - A device that allows the kernel to schedule a timer
+        interrupt for a particular length of time. This clock
+        is used to implement process scheduling for the OS.
+
+# Reading System Time in C
+
+  #include <sys/time.h> // gettimeofday
+  #include <time.h> // ctime()
+
+  struct timeval current_time;
+  gettimeofday(&current_time, NULL);
+
+  current_time.tv_sec; // represents number of seconds elapsed since unix epoch
+  current_time.tv_usec; // represents microsecond portion of the time
+
+  // Note that current_time.tv_sec is a time_t which is usually
+  // a signed integer, and is why we can pass it as a ptr to ctime.
+
+  char *timestring = ctime(&current_time.tv_sec);
+  puts(timestring);
+
+# Timer Interrupt Service Routine
+
+Whenever the PIT issues an interrupt, it's handled by an ISR
+called timer_interrupt in the linux kernel src.
+
+Activities:
+  - Update time elapsed since system boot
+  - Update time and date
+  - Determine the length of time for the current process and pre-empt it
+    if it exceeded its time quantum.
+  - Update resource usage stats.
+  - Update software timers.
+
+# PCB (Process Control Block)
+
+A PCB, or process descriptor, is stored in a task_struct
+located in sched.h.
+
+The kernel updates relevant fields in the descriptor in a
+function called update_process_times() in timer.c.
+
+## Timers in the time_struct
+
+**ITIMER_REAL**: Reflects the passage of real time
+**ITIMER_VIRTUAL**: Reflects the passage of virtual time (incremented only when the process is executing)
+**ITIMER_PROF**: Reflects the passage of virtual time + time used by the kernel doing work for the process (eg. reading a timer).
+
+These timers can be set with the setitimer() system call, and be read
+using getitimer()
+
+# Signals
+
+Unix systems have a fixed set of signals that one process can raise,
+causing another process to be interrupted.
+
+The second process can catch the signal by executing a handler.
+
+Signals are a means for one process to notify another that something
+has occurred and to take some appropriate action.
+
+In our mytimer2.c file, we see that since we handle the SIGARLM (14)
+signal, the program doesn't terminate (default behaviour).
+
+# Multithreading
+
+We use POSIX threads (pthreads) via #include <pthreads.h> to create
+and manage threads, which are concurrent threads of execution within
+a single process that shares global memory.
+
+Threads share memory, file descriptors, process ID.
+
+The entire virtual address space of a process is shared between threads,
+so all pointers remain valid between threads.
+
+Benefits:
+  - Responsiveness (Especially UI's)
+  - Resource sharing (shared memory)
+  - Economy (cheaper than process creation, less overhead to thread switch)
+  - Scalability (Applications can take advantage of multi-core processors)
+
+## Amdahl's Law
+
+This identifies the performance gain from adding additional cores to
+an application.
+
+Let S be the proportion of serial instructions in a given application
+Let N be the number of processing cores
+
+(1-S) then represents the proportion of the application that is parallel
+
+speedup <= 1 / (S + (1-S)/N)
+
+Eg. If an application is 75% parallel / 25% serial, moving from 1 to 2
+    cores results in a speedup of 1.6 times.
+
+    speedup <= 1 / (0.25 + 0.75/2) = 1 / 0.625 = 1.6
+
+As N -> inf, speedup approaches 1 / S.
+
+## Multithreading models
+
+*Many-to-One*
+  - This is many user-level threads mapped to one kernel thread.
+  - Very fast since CPU doesn't have to context switch to kernel mode.
+  - Downside: if one thread blocks, everyone is blocked since the kernel
+    can't differentiate between the user threads and just blocks the whole
+    kernel thread.
+
+*One-to-one*
+  - Each user-level thread maps to a kernel thread.
+  - More concurrency
+  - Number of threads per processes can be restricted due to the overhead
+  - Windows & Linux
+
+*Many-to-many*
+  - User level threads can be mapped to many kernel threads.
+
+*Two-level model*
+  - Similar to many-to-many but allows user thread to be bound to a kernel thread.
+
+## Thread-local storage
+
+This is a portion of memory that is globally accessible within a thread yet
+invisible to all other threads. Each thread has their own copy of thread-local
+memory.
+
+Example, errno in C is thread-local.
+
+This is important because if one thread gets into an error, it would not be
+able to be overriden by another thread that resets the variable.
+
+Stack memory is technically thread-local but it obviously only exists
+transiently at the function level.
+
+# Questions
+
+Provide three programming examples in which multithreading provides better performance
+than a single-threaded solution.
+
+1) When loading assets in a video game, the system may freeze since it may take
+   a few seconds to read the necessary game assets (3d models, sound files etc)
+   so another thread can be used to display a loading screen and keep the process
+   from freezing.
+2) When doing a calculation on a large array where the outputs are deterministic,
+   one can use multithreading to partition the array into many segments where
+   individual worker threads calculate sub-results, then collate them together
+   after joining.
+3) In a game, there may be a thread running in the background that continously
+   streams in & frees assets as the player moves through the game world to
+   ensure there are no loading screens, and moving through the map is seamless.
+4) Handling web server responses. Dedicate a separate thread to responding to
+   each incoming connection to maintain performance with many users.
+5) Word processor: one thread may handle user input, another may handle
+   rendering the text to the screen, and another thread to spell-check in the
+   background at a slower rate.

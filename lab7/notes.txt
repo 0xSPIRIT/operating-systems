@@ -1,0 +1,55 @@
+Lab 7
+=====
+
+# Semaphores
+
+A synchronization mechanism used in operating systems to control access
+to shared resources.
+
+- Prevents race conditions
+- Protects critical systems
+- Coordinate processes
+
+(wait) Down Operation (P): Decreases the semaphore value, and the process or
+                           thread executing wait() sleeps until the
+                           semaphore becomes available (the process is
+                           added to a queue)
+(signal) Up Operation (V): Increases the semaphore value by 1. If there are
+                           processes in the ready queue, one of them is
+                           removed and resumes execution. Highest priority
+                           taken.
+
+Atomicity: This refers to the property of an operation to be completed
+           in one instruction, with no possibility of another process
+           to observe it in a partially completed state.
+
+The semaphore operations, P and V (wait and signal) are specifically
+designed to be atomic, and are implemented using OS-level features.
+
+This is why we cannot use regular variables or code to lock critical
+sections. Say we have this:
+
+  int semaphore = 0;
+
+  while (1) {
+    while (semaphore == 1);
+
+    semaphore = 1;
+
+    // critical code
+
+    semaphore = 0;
+  }
+
+Say process 1 loads `semaphore` from memory, and its value is 0 at this point.
+Another process 2, concurrently at the same point in the function as process 1,
+sees its value is 0 as wel. Both move to the next instruction, setting
+semaphore = 1.
+
+Hence, our semaphore failed to do its job because the check & the lock are not
+atomic -- while (semaphore == 1) and semaphore = 1 are distinct operations.
+
+## Binary Semaphores
+
+A binary semaphore is a mutex, which oscillates between 0 and 1 -- locked or
+unlocked.

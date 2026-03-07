@@ -1,0 +1,17 @@
+[Child 1] fibonacci(50) = 12586269025
+Wall Time Spent Executing: 35 seconds, 280100 microseconds
+Total Time Spent on CPU: 35 seconds, 385681 microseconds
+Time Spent in User Space: 35 seconds, 385681 microseconds
+Time Spent in Kernel Space: 0 seconds, 0 microseconds
+
+[Child 2] fibonacci(51) = 20365011074
+Wall Time Spent Executing: 57 seconds, 960665 microseconds
+Total Time Spent on CPU: 56 seconds, 151882 microseconds
+Time Spent in User Space: 56 seconds, 154872 microseconds
+Time Spent in Kernel Space: 0 seconds, -2990 microseconds
+
+[Parent] fibonacci(52) = 32951280099
+Wall Time Spent Executing: 89 seconds, 752047 microseconds
+Total Time Spent on CPU: 88 seconds, 22074 microseconds
+Time Spent in User Space: 88 seconds, 23068 microseconds
+Time Spent in Kernel Space: 0 seconds, -994 microseconds

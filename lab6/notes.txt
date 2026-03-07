@@ -1,0 +1,11 @@
+Lab 6
+----
+
+# CPU Scheduling
+
+Burst Time            - Total amount of CPU time a process needs to complete
+Arrival Time          - When the process enters the ready queue
+Completion Time       - When process finishes execution
+Turnaround Time (TAT) - Total time from arrival to completion
+Waiting Time (WT)     - Total time a process spends sitting in the ready queue
+Gantt Chart           - Horizontal bar chart showing time.
