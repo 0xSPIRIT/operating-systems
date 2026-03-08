@@ -1,0 +1,9 @@
+OS Chapter 3
+============
+
+Parts of a process:
+  - program code (text section)
+  - Current activity: program counter, processor registers
+  - Stack memory
+  - Data section (global variables)
+  - Heap memory

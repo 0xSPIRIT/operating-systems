@@ -1,0 +1,118 @@
+OS Chapter 1
+============
+
+What an operating system does
+  - OS is a resource allocator and control program that makes
+    efficient use of the hardware to manage & execute user programs
+  - User conveience > Resource utilization
+
+Resource allocator:
+  - Manages all resources on the machine
+  - Decies between conflicting requests for resources
+
+Control program:
+  - Controls execution of programs to prevent errors
+
+Kernel:
+  - The code that runs at all times on the computer
+
+Types of programs:
+  System program:
+    - Code that ships with the OS but not part of the kernel
+  Application program:
+    - All programs not associated with the OS, eg. web browser
+
+System bus:
+  - A way device controllers connect with the CPU and memory
+    (PCIe)
+
+Device controllers:
+  - In charge of a particular device
+  - Has a local buffer
+  - Associated with a driver
+  - CPU moves data to/from the local buffer
+  - Informs the CPU via an interrupt
+
+Interrupt vector:
+  - Upon an interrupt, the ISR transfers control
+    to the particular interrupt handler
+  - Saves the address of the interrupted instruction
+
+Types of interrupt handling:
+  - Polling: Repeatedly querying the state of a device at a particular frequency
+  - Vectored: The interrupting device provides a specific code to the CPU,
+              avoiding the need for the processor to find the correct handler address
+              from a table
+
+I/O structure:
+  - Control returns to user program only upon I/O completion
+  - Wait instruction idles the CPU until the next interrupt
+  - No simultaneous I/O processing
+
+Main memory:
+  - Volatile, random access
+
+Device driver:
+  - Provides a uniform interface between a device controller and kernel.
+
+Multiprocessor systems:
+  - Increased throughput
+  - Economy of scale
+  - Increased reliability
+  - AKA: Parallel systems, tightly-coupled systems
+  - Types:
+    - Asymmetric - Each processor assigned a specific task
+    - Symmetric - Each processor performs all tasks
+
+Clustered systems:
+  - A group of 2 or more independent connected computers
+    that work together as a single system to improve
+    performance scalability and reliability
+  - Connected via storage area network
+
+Bootstrap program:
+  - Simple code to initialize the system and load the kernel
+  - Kernel then loads
+  - Starts the system daemons
+  - The kernel is interrupt driven (hadrware / software interrupts)
+
+Multiprogramming:
+  - Multiple jobs are kept in memory at the same time
+  - One job is scheduled and run
+  - When it has to wait for I/O, the OS switches to another job
+
+Timesharing (multitasking):
+  - CPU switches jobs frequently giving the illusion of multitasking
+  - If processes don't fit in memory, swapping
+  - Virtual memory
+
+Dual mode:
+  - User mode - unprivileged
+  - Kernel mode - privileged actions
+
+Process management activities:
+  - Creating and deleting user and system processes
+  - Suspending and resuming processes
+  - Providing mechanisms for process synchronization
+  - Providing mechanisms for process communication
+  - Providing mechanisms for deadlock handling
+
+Memory management:
+  - Determines what is in memory & when.
+
+File management:
+  - Mounting and unmounting drives
+  - Free-space management
+  - Storage allocation
+  - Disk scheduling
+  - Partitioning
+  - Protection
+
+Caching:
+  - Frequently and recently accessed information
+    can be copied from slower to faster storage
+    temporarily
+
+Protection:
+  - Any mechanism for controlling access of processes
+    or users to resources defined by the OS
